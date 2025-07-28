@@ -2,29 +2,45 @@ import streamlit as st
 from PIL import Image
 import os
 
-st.title("🚓 Police Crime Data Dashboard")
-st.write("Visual insights into crime trends, types, and forecasts.")
+def load_image(name):
+    return Image.open(os.path.join("plots", name))
 
-# Path to your plot images
-plot_folder = "plots"
+# Page Title
+st.title("🚔 POLICE SERVICE NORTHERN IRELAND")
 
-# Map of display names to image file names
-image_files = {
-    "Crime Forecast": "Crime_forecast.png",
-    "Crime Types": "Crime_type.png",
-    "Heatmap": "heatmap.png",
-    "Monthly Crime Count": "Monthly_crime_count.png",
-    "Monthly Crime Trend": "Monthly_crime.png",
-    "Seasonal Crime Pattern": "seasonal_crime.png",
-    "Time Series Crime Count": "Time_series_crime_count.png",
-    "Top 10 Crime Locations": "Top_10_crime_location.png"
-}
+# Tabs
+tab_descriptive, tab_predictive = st.tabs(["📊 Descriptive Analysis", "📈 Forecast for the Next Six Months"])
 
-# Sidebar for plot selection
-selected_plot = st.sidebar.selectbox("📊 Select a plot to view:", list(image_files.keys()))
+with tab_descriptive:
+    st.header("Descriptive Analysis")
 
-# Load and display the selected image
-image_path = os.path.join(plot_folder, image_files[selected_plot])
-image = Image.open(image_path)
-st.image(image, caption=selected_plot, use_column_width=True)
+    st.image(load_image("Monthly_crime.png"), caption="Monthly Crime Overview")
+    st.markdown("This plot shows the monthly trend of reported crimes, helping identify peak periods during the year.")
+    
+    st.image(load_image("Crime_type.png"), caption="Crime Types Distribution")
+    st.markdown("Breakdown of crimes by type, showing the proportion of each crime category within the dataset.")
+    
+    st.image(load_image("seasonal_crime.png"), caption="Seasonal Crime Trends")
+    st.markdown("Analysis of seasonal variations in crime, helping anticipate fluctuations throughout the year.")
+
+    st.image(load_image("Time_series_crime_count.png"), caption="Time Series Crime Count")
+    st.markdown("A time series plot showing the overall crime count over time for long-term trend analysis.")
+
+    st.image(load_image("heatmap.png"), caption="Crime Heatmap")
+    st.markdown("A geographical heatmap highlighting crime hotspots across the region.")
+
+    st.image(load_image("Top_10_crime_location.png"), caption="Top 10 Crime Locations")
+    st.markdown("The top 10 locations with the highest crime rates. Useful for targeted intervention strategies.")
+
+with tab_predictive:
+    st.header("Forecast for the Next Six Months")
+
+    months = st.slider("Select Forecast Horizon (Months)", min_value=1, max_value=12, value=6)
+    st.write(f"Displaying crime forecast for the next {months} month(s).")
+
+    st.image(load_image("Monthly_crime_count.png"), caption="Monthly Crime Count Overview")
+    st.markdown("Alternative monthly crime overview used as a baseline comparison for forecast accuracy.")
+
+    st.image(load_image("Crime_forecast.png"), caption="Crime Forecast")
+    st.markdown("Forecasted crime counts based on predictive models, projecting trends into the next six months.")
 
