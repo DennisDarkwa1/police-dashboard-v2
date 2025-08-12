@@ -1,51 +1,74 @@
 import streamlit as st
-from PIL import Image
 import os
+from PIL import Image
 
-# Path to your plots folder
-PLOTS_FOLDER = os.path.expanduser("~/Desktop/police-dashboard/plots")
+# Path to your plots folder (adjust if necessary)
+PLOTS_FOLDER = os.path.expanduser("~/Desktop/police-dashboard")
 
+# Function to load images
 def load_image(filename):
     return Image.open(os.path.join(PLOTS_FOLDER, filename))
 
-# --- Dashboard Title ---
-st.set_page_config(page_title="Police Service Northern Ireland", layout="wide")
-st.title("🚔 POLICE SERVICE NORTHERN IRELAND")
+# App title
+st.set_page_config(page_title="POLICE SERVICE NORTHERN IRELAND", layout="wide")
+st.title("POLICE SERVICE NORTHERN IRELAND")
 
-# --- Tabs ---
-tab1, tab2, tab3 = st.tabs(["👮 Anti-Social Behaviour", "📊 Descriptive Dashboard", "🔮 6-Month Forecast"])
+# Tabs
+tab1, tab2, tab3 = st.tabs(["📌 Introduction", "📊 Descriptive Analysis", "📈 Forecast for Next Six Months"])
 
-# --- Tab 1: Anti-Social Behaviour ---
+# ---------------- Tab 1: Introduction ----------------
 with tab1:
     st.subheader("Anti-Social Behaviour: The Most Reported Crime")
-    st.image("https://ichef.bbci.co.uk/news/976/cpsprodpb/11E65/production/_125632732_policearrest.jpg", 
-             caption="UK Police making an arrest for anti-social behaviour", use_column_width=True)
+    st.image(
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Police_arrest_UK.jpg/640px-Police_arrest_UK.jpg",
+        caption="UK Police arresting a suspect for anti-social behaviour",
+        use_container_width=True
+    )
     st.markdown("""
-        **Anti-social behaviour** accounts for the largest proportion of crimes in the dataset.  
-        These incidents often include disorderly conduct, vandalism, harassment, and public disturbances.  
-        Tackling these offences remains a key priority for the Police Service of Northern Ireland to maintain 
-        public safety and community confidence.
+    Anti-social behaviour is the **most frequently recorded crime** in the dataset, 
+    making up a significant portion of all reported incidents.
+    This category includes harassment, vandalism, intimidation, and other acts 
+    that disrupt public peace and safety.
+    
+    The following dashboard provides detailed insights into crime patterns in Northern Ireland.
     """)
 
-# --- Tab 2: Descriptive Dashboard ---
+# ---------------- Tab 2: Descriptive Analysis ----------------
 with tab2:
-    st.subheader("Descriptive Analysis")
+    st.subheader("Crime Insights Overview")
+    
     col1, col2 = st.columns(2)
-    
     with col1:
-        st.image(load_image("seasonal_crime.png"), caption="Seasonal Crime Trends")
-        st.image(load_image("Top_10_crime_location.png"), caption="Top 10 Crime Locations")
-    
+        st.image(load_image("Crime_type.png"), caption="Crime Types Distribution", use_container_width=True)
     with col2:
-        st.image(load_image("Monthly_crime.png"), caption="Monthly Crime Overview")
-        st.image(load_image("Time_series_crime_count.png"), caption="Crime Count Over Time")
+        st.image(load_image("Top_10_crime_location.png"), caption="Top 10 Crime Locations", use_container_width=True)
 
-# --- Tab 3: Forecast ---
+    col3, col4 = st.columns(2)
+    with col3:
+        st.image(load_image("Monthly_crime.png"), caption="Monthly Crime Trend", use_container_width=True)
+    with col4:
+        st.image(load_image("heatmap.png"), caption="Crime Heatmap (Seasonality)", use_container_width=True)
+
+    col5, col6 = st.columns(2)
+    with col5:
+        st.image(load_image("seasonal_crime.png"), caption="Seasonal Crime Trends", use_container_width=True)
+    with col6:
+        st.image(load_image("Time_series_crime_count.png"), caption="Crime Counts Over Time", use_container_width=True)
+
+# ---------------- Tab 3: Forecast ----------------
 with tab3:
-    st.subheader("Crime Forecast: Next Six Months")
-    st.image(load_image("Monthly_crime_count.png"), caption="Forecast of Monthly Crime Counts")
+    st.subheader("Crime Forecast for the Next Six Months")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(load_image("Monthly_crime_count.png"), caption="Monthly Crime Counts", use_container_width=True)
+    with col2:
+        st.image(load_image("Crime_forecast.png"), caption="Forecasted Crime Trends", use_container_width=True)
+
     st.markdown("""
-        Using time-series analysis, we have forecasted crime trends for the next six months.  
-        This helps in resource planning and proactive policing strategies.
+    The forecast model predicts crime trends for the next **six months**.
+    It is based on historical data patterns and seasonality effects, 
+    helping to anticipate potential spikes in incidents.
     """)
+
 
