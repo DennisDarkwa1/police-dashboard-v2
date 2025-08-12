@@ -1,46 +1,75 @@
 import streamlit as st
 from PIL import Image
-import os
 
-def load_image(name):
-    return Image.open(os.path.join("plots", name))
+# -------------------------
+# Page Config
+# -------------------------
+st.set_page_config(
+    page_title="POLICE SERVICE NORTHERN IRELAND",
+    layout="wide"
+)
 
-# Page Title
-st.title("🚔 POLICE SERVICE NORTHERN IRELAND")
+# -------------------------
+# Title
+# -------------------------
+st.title("🚓 POLICE SERVICE NORTHERN IRELAND")
+st.markdown("### Interactive Dashboard - Crime Data Insights & Forecasts")
 
+# -------------------------
 # Tabs
-tab_descriptive, tab_predictive = st.tabs(["📊 Descriptive Analysis", "📈 Forecast for the Next Six Months"])
+# -------------------------
+tab1, tab2, tab3 = st.tabs([
+    "Anti-Social Behaviour Overview",
+    "Crime Insights Dashboard",
+    "Forecast for the Next Six Months"
+])
 
-with tab_descriptive:
-    st.header("Descriptive Analysis")
-
-    st.image(load_image("Monthly_crime.png"), caption="Monthly Crime Overview")
-    st.markdown("This plot shows the monthly trend of reported crimes, helping identify peak periods during the year.")
+# -------------------------
+# TAB 1 - Anti-Social Behaviour
+# -------------------------
+with tab1:
+    st.header("Anti-Social Behaviour in Northern Ireland")
+    st.markdown("""
+    Anti-social behaviour is the **highest recorded crime** in the dataset.  
+    It includes actions that cause harassment, alarm, or distress to people in the community.  
+    Law enforcement agencies are focusing efforts to address these issues and maintain public safety.
+    """)
     
-    st.image(load_image("Crime_type.png"), caption="Crime Types Distribution")
-    st.markdown("Breakdown of crimes by type, showing the proportion of each crime category within the dataset.")
-    
-    st.image(load_image("seasonal_crime.png"), caption="Seasonal Crime Trends")
-    st.markdown("Analysis of seasonal variations in crime, helping anticipate fluctuations throughout the year.")
+    # Display image
+    try:
+        img = Image.open("uk_police_arrest.jpg")  # Ensure this file is in the repo root
+        st.image(img, caption="UK Police arresting suspect for anti-social behaviour", use_column_width=True)
+    except FileNotFoundError:
+        st.error("Image 'uk_police_arrest.jpg' not found. Please add it to the repo.")
 
-    st.image(load_image("Time_series_crime_count.png"), caption="Time Series Crime Count")
-    st.markdown("A time series plot showing the overall crime count over time for long-term trend analysis.")
+# -------------------------
+# TAB 2 - Crime Insights Dashboard
+# -------------------------
+with tab2:
+    st.header("Crime Insights Dashboard")
+    st.markdown("Visual representation of key crime trends in Northern Ireland.")
 
-    st.image(load_image("heatmap.png"), caption="Crime Heatmap")
-    st.markdown("A geographical heatmap highlighting crime hotspots across the region.")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("seasonal_crime.png", caption="Seasonal Crime Patterns", use_column_width=True)
+        st.image("Monthly_crime.png", caption="Monthly Crime Trends", use_column_width=True)
+        st.image("heatmap.png", caption="Crime Heatmap", use_column_width=True)
 
-    st.image(load_image("Top_10_crime_location.png"), caption="Top 10 Crime Locations")
-    st.markdown("The top 10 locations with the highest crime rates. Useful for targeted intervention strategies.")
+    with col2:
+        st.image("Top_10_crime_location.png", caption="Top 10 Crime Locations", use_column_width=True)
+        st.image("Crime_type.png", caption="Crime Type Distribution", use_column_width=True)
+        st.image("Time_series_crime_count.png", caption="Crime Count Over Time", use_column_width=True)
 
-with tab_predictive:
-    st.header("Forecast for the Next Six Months")
+# -------------------------
+# TAB 3 - Forecast
+# -------------------------
+with tab3:
+    st.header("Crime Forecast for the Next Six Months")
+    st.markdown("Predictive analysis based on historical crime data to anticipate trends.")
 
-    months = st.slider("Select Forecast Horizon (Months)", min_value=1, max_value=12, value=6)
-    st.write(f"Displaying crime forecast for the next {months} month(s).")
-
-    st.image(load_image("Monthly_crime_count.png"), caption="Monthly Crime Count Overview")
-    st.markdown("Alternative monthly crime overview used as a baseline comparison for forecast accuracy.")
-
-    st.image(load_image("Crime_forecast.png"), caption="Crime Forecast")
-    st.markdown("Forecasted crime counts based on predictive models, projecting trends into the next six months.")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("Monthly_crime_count.png", caption="Monthly Crime Count", use_column_width=True)
+    with col2:
+        st.image("Crime_forecast.png", caption="Forecasted Crime Trends", use_column_width=True)
 
