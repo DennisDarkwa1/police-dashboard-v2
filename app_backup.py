@@ -10,7 +10,7 @@ HERO_IMG  = BASE_DIR / "IMG_2429.jpeg"
 
 files = {
     "crime_type":    PLOTS_DIR / "Crime_type.png",
-    "top10_loc_1":   PLOTS_DIR / "Top_10_crime_location_1.png",  # updated filename
+    "top10_loc_1":   PLOTS_DIR / "Top_10_crime_location_1.png",
     "heatmap":       PLOTS_DIR / "heatmap.png",
     "monthly":       PLOTS_DIR / "Monthly_crime.png",
     "seasonal":      PLOTS_DIR / "seasonal_crime.png",
@@ -19,34 +19,48 @@ files = {
     "forecast":      PLOTS_DIR / "Crime_forecast.png",
 }
 
-# ---------- Plot descriptions (used as captions) ----------
+# ---------- Plot descriptions (for captions) ----------
 desc = {
     "forecast":      "Crime in Northern Ireland is forecasted to rise in the next six months, highlighting the need for proactive policing",
     "seasonal":      "Crime peaks in summer and drops in winter, showing strong seasonal patterns",
-    "crime_type":    "Anti-social behavior and violent offences dominate crime in Northern Ireland, while robbery and theft are least common",
+    "crime_type":    "Anti-social behaviour and violent offences dominate crime in Northern Ireland, while robbery and theft are least common",
     "top10_loc_1":   "Main Street leads as the top crime hotspot, followed by High Street and Antrim Road",
-    "heatmap":       "Urban centers like Belfast and Derry show the highest crime concentration, while rural areas remain relatively low",
+    "heatmap":       "Urban centres like Belfast and Derry show the highest crime concentration, while rural areas remain relatively low",
     "monthly_count": "Crime levels dipped in early 2023 but have since risen back towards previous highs",
     "monthly":       "Crime peaked in late 2022, dipped early 2023, and has since risen again",
-    "ts_count":      "Anti-social behavior and violent offences dominate monthly crime trends, while robbery and weapons offences remain low",
+    "ts_count":      "Anti-social behaviour and violent offences dominate monthly crime trends, while robbery and weapons offences remain low",
 }
 
-# ---------- Sidebar controls (make it lively) ----------
+# ---------- Sidebar controls ----------
 st.sidebar.title("🎛️ Controls")
 presenter_mode = st.sidebar.toggle("Presenter mode", value=False, help="Big visuals + Next/Prev navigation")
 show_desc      = st.sidebar.toggle("Show descriptions", value=True)
 layout_choice  = st.sidebar.radio("Layout", ["2-column grid", "1-column focus"], help="Affects tabs 2 & 3")
-img_width      = st.sidebar.slider("Image max width (px)", 500, 1400, 1000, help="If using 1-column focus")
-st.sidebar.caption("Tip: Toggle Presenter mode during your talk.")
+img_width      = st.sidebar.slider("Image max width (px)", 600, 1600, 1100, help="Used in 1-column & Presenter mode")
+caption_size   = st.sidebar.slider("Caption font size (px)", 16, 28, 20)
 
-# Toast once when presenter mode turns on
-if presenter_mode and not st.session_state.get("presenter_toast_shown"):
-    st.toast("🎤 Presenter mode ON")
-    st.session_state["presenter_toast_shown"] = True
-if not presenter_mode:
-    st.session_state["presenter_toast_shown"] = False
+# ---------- Style injection (bigger, cleaner captions) ----------
+st.markdown(f"""
+<style>
+/* Larger, presentation-ready captions */
+.plot-caption {{
+  font-size: {caption_size}px;
+  line-height: 1.45;
+  font-weight: 600;
+  margin: .4rem 0 1rem;
+}}
+/* Make tabs a bit chunkier for visibility */
+.stTabs [data-baseweb="tab"] {{
+  padding: .5rem 1rem;
+  border-radius: 10px;
+}}
+/* Slightly larger subheaders in presenter mode */
+{"h3, .stMarkdown h3 { font-size: 1.5rem; }" if presenter_mode else ""}
+</style>
+""", unsafe_allow_html=True)
 
-def safe_image(path: Path, key: str, caption_key: str | None = None):
+# ---------- Helpers ----------
+def safe_image(path: Path, key: str, caption_key: str = None):
     """Render an image safely with optional caption and width control."""
     if not path.exists():
         st.warning(f"Missing file: `{path.name}` (expected at {path})")
@@ -56,7 +70,25 @@ def safe_image(path: Path, key: str, caption_key: str | None = None):
     else:
         st.image(str(path), use_container_width=True)
     if show_desc and caption_key:
-        st.caption(desc.get(caption_key, ""))
+        st.markdown(f"<div class='plot-caption'>{desc.get(caption_key, '')}</div>", unsafe_allow_html=True)
+
+def slide_navigator(state_key: str, items: list, title_map: dict):
+    """Next/Prev navigation for presenter-style flow."""
+    idx = st.session_state.get(state_key, 0)
+    col_prev, col_idx, col_next = st.columns([1,2,1])
+    with col_prev:
+        if st.button("◀ Prev", use_container_width=True, key=f"{state_key}_prev"):
+            idx = (idx - 1) % len(items)
+    with col_idx:
+        st.markdown(
+            f"<div style='text-align:center;'>Slide {idx+1} / {len(items)} — "
+            f"<b>{title_map[items[idx]]}</b></div>", unsafe_allow_html=True
+        )
+    with col_next:
+        if st.button("Next ▶", use_container_width=True, key=f"{state_key}_next"):
+            idx = (idx + 1) % len(items)
+    st.session_state[state_key] = idx
+    return items[idx]
 
 # ---------- Title ----------
 st.title("🚓 POLICE SERVICE NORTHERN IRELAND")
@@ -74,36 +106,19 @@ with tab1:
 - This typically spans noise complaints, public disorder, harassment, and related nuisance reports.
         """
     )
-    safe_image(HERO_IMG, key="hero")  # no caption
-
-# ---------- Helpers for interactive “slides” ----------
-def slide_navigator(state_key: str, items: list[str], title_map: dict[str, str]):
-    """Show Next/Prev buttons to move through selected plots like slides."""
-    idx = st.session_state.get(state_key, 0)
-    col_prev, col_idx, col_next = st.columns([1,2,1])
-    with col_prev:
-        if st.button("◀ Prev", use_container_width=True, key=f"{state_key}_prev"):
-            idx = (idx - 1) % len(items)
-    with col_idx:
-        st.markdown(f"<div style='text-align:center;'>Slide {idx+1} / {len(items)} — <b>{title_map[items[idx]]}</b></div>", unsafe_allow_html=True)
-    with col_next:
-        if st.button("Next ▶", use_container_width=True, key=f"{state_key}_next"):
-            idx = (idx + 1) % len(items)
-    st.session_state[state_key] = idx
-    return items[idx]
+    safe_image(HERO_IMG, key="hero")  # no caption for hero image
 
 # ---------- Tab 2: Current Trends (interactive) ----------
 with tab2:
     st.subheader("Current Trends")
 
-    # Let presenter choose which plots to show & order
     available_trends = {
-        "crime_type": "Crime Type Distribution",
+        "crime_type":  "Crime Type Distribution",
         "top10_loc_1": "Top 10 Crime Locations",
-        "heatmap": "Crime Heatmap",
-        "monthly": "Monthly Crime Count",
-        "seasonal": "Seasonal Crime Pattern",
-        "ts_count": "Time Series — Crime Count",
+        "heatmap":     "Crime Heatmap",
+        "monthly":     "Monthly Crime Count",
+        "seasonal":    "Seasonal Crime Pattern",
+        "ts_count":    "Time Series — Crime Count",
     }
     default_order = ["crime_type", "top10_loc_1", "heatmap", "monthly", "seasonal", "ts_count"]
 
@@ -116,17 +131,14 @@ with tab2:
     )
 
     if presenter_mode and selected:
-        # Slide deck style
         current_key = slide_navigator("trends_slide_idx", selected, available_trends)
         safe_image(files[current_key], key=f"trends_{current_key}", caption_key=current_key)
     else:
-        # Grid or single column
         if layout_choice == "1-column focus":
             for k in selected:
                 safe_image(files[k], key=f"trends_{k}", caption_key=k)
                 st.divider()
         else:
-            # 2-column grid
             rows = [selected[i:i+2] for i in range(0, len(selected), 2)]
             for r in rows:
                 c1, c2 = st.columns(2)
@@ -144,7 +156,7 @@ with tab3:
     forecast_keys = ["monthly_count", "forecast"]
     titles_map = {
         "monthly_count": "Monthly Crime Count (Historical)",
-        "forecast": "Forecasted Crime (Next 6 Months)",
+        "forecast":      "Forecasted Crime (Next 6 Months)",
     }
 
     if presenter_mode:
